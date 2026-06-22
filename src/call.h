@@ -103,8 +103,8 @@ namespace render{
     vectorFunctions::Vector3D subtract3D(const vectorFunctions::Vector3D& v0, const vectorFunctions::Vector3D& v1);
 
     // Render Variables //
-    const unsigned short int screenW {960};
-    const unsigned short int screenH {540};
+    const unsigned short int screenW {1920};
+    const unsigned short int screenH {1080};
 
     extern uint32_t colorBuffer[screenW * screenH];
     extern uint32_t finalBuffer[screenW * screenH];
@@ -190,7 +190,7 @@ namespace render{
                     triangles[i].texture = &myTexture;
                 }
             }
-            void computeNormals(){
+            void computeNormalsFlat(){
                 std::vector<vectorFunctions::Vector3D> normalAccumalator(points.size(), {0,0,0});
 
                 for(int i {0}; i < triangles.size(); i++){
@@ -215,6 +215,61 @@ namespace render{
                 normals.clear();
                 for(int i {0}; i < normalAccumalator.size(); i++){
                     normals.push_back(vectorFunctions::normalize(vectorFunctions::multiply3D(normalAccumalator[i],-1.0f)));
+                }
+            }
+            void computeNormalsSmooth(float maxAngle = 35){
+                float minDotProduct {std::cos(maxAngle * render::radian)};
+                std::vector<vectorFunctions::Vector3D> faceNormals {};
+
+                normals.clear();
+
+                for(int i {0}; i < triangles.size(); i++){
+                    render::model::ModelTriangle& triangle {triangles[i]};
+
+                    render::Point3D p0 {points[triangle.pIndex0]};
+                    render::Point3D p1 {points[triangle.pIndex1]};
+                    render::Point3D p2 {points[triangle.pIndex2]};
+
+                    vectorFunctions::Vector3D edge1 {p1.x - p0.x, p1.y - p0.y, p1.z - p0.z};
+                    vectorFunctions::Vector3D edge2 {p2.x - p0.x, p2.y - p0.y, p2.z - p0.z};
+
+                    vectorFunctions::Vector3D faceNormal {vectorFunctions::normalize(vectorFunctions::crossProduct(edge1, edge2))};
+                    faceNormals.push_back(faceNormal);
+                }
+
+                for(int i {0}; i < triangles.size(); i++){
+                    render::model::ModelTriangle& triangleI {triangles[i]};
+
+                    vectorFunctions::Vector3D n0 {faceNormals[i]};
+                    vectorFunctions::Vector3D n1 {faceNormals[i]};
+                    vectorFunctions::Vector3D n2 {faceNormals[i]};
+
+                    for(int j {0}; j < triangles.size(); j++){
+                        if(i == j || vectorFunctions::dotProduct(faceNormals[i], faceNormals[j]) < minDotProduct){
+                            continue;
+                        }
+
+                        render::model::ModelTriangle& triangleJ {triangles[j]};
+                        if(triangleI.pIndex0 == triangleJ.pIndex0 || triangleI.pIndex0 == triangleJ.pIndex1 || triangleI.pIndex0 == triangleJ.pIndex2){
+                            n0 = add3D(n0, faceNormals[j]);
+                        }
+                        if(triangleI.pIndex1 == triangleJ.pIndex0 || triangleI.pIndex1 == triangleJ.pIndex1 || triangleI.pIndex1 == triangleJ.pIndex2){
+                            n1 = add3D(n1, faceNormals[j]);
+                        }
+                        if(triangleI.pIndex2 == triangleJ.pIndex0 || triangleI.pIndex2 == triangleJ.pIndex1 || triangleI.pIndex2 == triangleJ.pIndex2){
+                            n2 = add3D(n2, faceNormals[j]);
+                        }
+                    }
+                    normals.push_back(vectorFunctions::normalize(vectorFunctions::multiply3D(n0, -1.0f)));
+                    triangleI.nIndex0 = normals.size() - 1;
+
+                    normals.push_back(vectorFunctions::normalize(vectorFunctions::multiply3D(n1, -1.0f)));
+                    triangleI.nIndex1 = normals.size() - 1;
+
+                    normals.push_back(vectorFunctions::normalize(vectorFunctions::multiply3D(n2, -1.0f)));
+                    triangleI.nIndex2 = normals.size() - 1;
+
+                    triangleI.hasNormals = true;
                 }
             }
             void orderTriangles(){
