@@ -38,7 +38,7 @@ namespace vectorFunctions{
     Vector3D convertAngle(float angleYaw, float anglePitch){
         float radianYaw {angleYaw * render::radian};
         float radianPitch {anglePitch * render::radian};
-        return {(-std::sin(radianYaw) * std::cos(radianPitch)),std::sin(radianPitch),(-std::cos(radianYaw) * std::cos(radianPitch))};
+        return {(-std::sin(radianYaw) * std::cos(radianPitch)),-std::sin(radianPitch),(-std::cos(radianYaw) * std::cos(radianPitch))};
     }
     std::vector<Vector3D> directionalLights {};
     std::vector<SpotLight> spotLights {{{8 , 5 , 0}, convertAngle(275,25), 100,std::cos(25*render::radian), 275,25}};
@@ -137,6 +137,9 @@ namespace vectorFunctions{
         render::Point2D p1 {projectPointSL(tri.p1, spotLight, shadowMap.width, shadowMap.height)};
         render::Point2D p2 {projectPointSL(tri.p2, spotLight, shadowMap.width, shadowMap.height)};
         bool clockwise {(render::edgeFunction(p0,p1,p2) > 0) ? true : false};
+        if(!clockwise){
+            return;
+        }
         int maxX {static_cast<int>(std::round(std::max({p0.x, p1.x, p2.x})))};
         int maxY {static_cast<int>(std::round(std::max({p0.y, p1.y, p2.y})))};
         int minX {static_cast<int>(std::round(std::min({p0.x, p1.x, p2.x})))};
