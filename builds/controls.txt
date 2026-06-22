@@ -1,0 +1,6 @@
+W - Move Forward
+S - Move Backwards
+A - Rotate Left
+D - Rotate Right
+
+P - Teleport Spotlight to You
