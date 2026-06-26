@@ -494,10 +494,11 @@ namespace render{
 namespace transform{
     void rotateModelXY(render::model::Model& model, float rotate){
         static constexpr float radian {3.141f/180.0f};
+        const float cosRotate {std::cos(rotateRadians)};
+        const float sinRotate {std::sin(rotateRadians)};
+        
         for(int i {0}; i < model.points.size(); i++){
             float rotateRadians {rotate * radian};
-            const float cosRotate {std::cos(rotateRadians)};
-            const float sinRotate {std::sin(rotateRadians)};
 
             render::Point3D& point {model.points[i]};
             render::Point3D& centerPoint {model.center};
@@ -511,10 +512,12 @@ namespace transform{
     }
     void rotateModelXZ(render::model::Model& model, float rotate){
         static constexpr float radian {3.141f/180.0f};
+        
+        const float cosRotate {std::cos(rotateRadians)};
+        const float sinRotate {std::sin(rotateRadians)};
+        
         for(int i {0}; i < model.points.size(); i++){
             float rotateRadians {rotate * radian};
-            const float cosRotate {std::cos(rotateRadians)};
-            const float sinRotate {std::sin(rotateRadians)};
 
             render::Point3D& point {model.points[i]};
             render::Point3D& centerPoint {model.center};
@@ -528,10 +531,10 @@ namespace transform{
     }
     void rotateModelYZ(render::model::Model& model, float rotate){
         static constexpr float radian {3.141f/180.0f};
+        const float cosRotate {std::cos(rotateRadians)};
+        const float sinRotate {std::sin(rotateRadians)};
         for(int i {0}; i < model.points.size(); i++){
             float rotateRadians {rotate * radian};
-            const float cosRotate {std::cos(rotateRadians)};
-            const float sinRotate {std::sin(rotateRadians)};
 
             render::Point3D& point {model.points[i]};
             render::Point3D& centerPoint {model.center};
