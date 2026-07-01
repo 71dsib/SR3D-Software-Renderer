@@ -297,7 +297,7 @@ namespace render{
             neighborBY = sampleY + 1;
         }
         float fragWidth {std::abs(shadowMap.buffer[neighborBY*shadowMap.width+sampleX] - shadowMap.buffer[sampleY*shadowMap.width+neighborAX]) + std::abs(shadowMap.buffer[neighborBY*shadowMap.width+sampleX] - shadowMap.buffer[sampleY*shadowMap.width+sampleX])};
-        float bias {0.055 + fragWidth};
+        float bias {0.055f + fragWidth};
         if((lightPixel.sZ - spotLight.position.z) < shadowMap.buffer[sampleY*shadowMap.width+sampleX] + bias){
             return 1.0f;
         }else{
