@@ -243,8 +243,8 @@ namespace render{
     }
     void resetBuffers(){
         for(int i {0}; i < (screenW * screenH); i++){
-            colorBuffer[i] = 0x00ADD8E6;
-            zBuffer[i] = 1000000.0f;
+            colorBuffer[i] = 0x00000000;
+            zBuffer[i] = FLT_MAX;
         }
     }
 
