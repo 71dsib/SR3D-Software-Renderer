@@ -23,6 +23,7 @@ namespace vectorFunctions{
     float dotProduct(const Vector3D& v0, const Vector3D& v1);
     Vector3D crossProduct(const Vector3D& v0, const Vector3D& v1);
     Vector3D add3D(const Vector3D& v0, const Vector3D& v1);
+    vectorFunctions::Vector3D subtract3D(const vectorFunctions::Vector3D& v0, const vectorFunctions::Vector3D& v1);
     Vector3D multiply3D(const Vector3D& v, const float factor);
     float length(const Vector3D& v);
     float reciprocalLength(const Vector3D& v);
