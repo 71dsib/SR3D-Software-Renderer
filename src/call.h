@@ -10,9 +10,10 @@
 #include <algorithm>
 #include <utility>
 #include <cstdint>
-#include <execution>
 #include <cfloat>
 #include <omp.h>
+#include <string>
+#include <sstream>
 
 #include "vector.h"
 #include "render.h"
