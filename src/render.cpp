@@ -117,9 +117,12 @@ namespace antiAlias{
 namespace render{
     // Buffers //
 
-    uint32_t colorBuffer [screenW * screenH] {0};
-    uint32_t finalBuffer [screenW * screenH] {0};
-    float zBuffer [screenW * screenH] {0};
+    unsigned short int screenW {1920};
+    unsigned short int screenH {1080};
+
+    std::vector<uint32_t> colorBuffer(screenW*screenH);
+    std::vector<uint32_t> finalBuffer(screenW*screenH);
+    std::vector<float> zBuffer(screenW*screenH);
 
     // Camera Variables //
 
