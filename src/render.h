@@ -25,12 +25,12 @@ namespace render{
     };
 
     // Render Variables //
-    const unsigned short int screenW {1920};
-    const unsigned short int screenH {1080};
+    extern unsigned short int screenW;
+    extern unsigned short int screenH;
 
-    extern uint32_t colorBuffer[screenW * screenH];
-    extern uint32_t finalBuffer[screenW * screenH];
-    extern float zBuffer[screenW * screenH];
+    extern std::vector<uint32_t> colorBuffer;
+    extern std::vector<uint32_t> finalBuffer;
+    extern std::vector<float> zBuffer;
 
     // Camera Variables //
 
