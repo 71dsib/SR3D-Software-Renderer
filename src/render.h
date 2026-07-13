@@ -104,6 +104,7 @@ namespace render{
             std::vector<render::Point3D> points {};
             std::vector<vectorFunctions::Vector3D> normals {};
             std::vector<render::model::ModelTriangle> triangles {};
+            float xz, yz, xy;
             render::Point3D center {};
             float radius {};
 
