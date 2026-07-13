@@ -493,7 +493,7 @@ namespace transform{
         float rotateRadians {rotate * radian};
         const float cosRotate {std::cos(rotateRadians)};
         const float sinRotate {std::sin(rotateRadians)};
-        
+
         for(int i {0}; i < model.points.size(); i++){
             render::Point3D& point {model.points[i]};
             render::Point3D& centerPoint {model.center};
@@ -504,14 +504,15 @@ namespace transform{
             point.x = std::round(rotatedX*100.0f)/100.0f;
             point.y = std::round(rotatedY*100.0f)/100.0f;
         }
+        model.xy = rotate;
     }
     void rotateModelXZ(render::model::Model& model, float rotate){
         static constexpr float radian {3.141f/180.0f};
-        
+
         float rotateRadians {rotate * radian};
         const float cosRotate {std::cos(rotateRadians)};
         const float sinRotate {std::sin(rotateRadians)};
-        
+
         for(int i {0}; i < model.points.size(); i++){
             render::Point3D& point {model.points[i]};
             render::Point3D& centerPoint {model.center};
@@ -522,14 +523,15 @@ namespace transform{
             point.x = std::round(rotatedX*100.0f)/100.0f;
             point.z = std::round(rotatedZ*100.0f)/100.0f;
         }
+        model.xz = rotate;
     }
     void rotateModelYZ(render::model::Model& model, float rotate){
         static constexpr float radian {3.141f/180.0f};
-        
+
         float rotateRadians {rotate * radian};
         const float cosRotate {std::cos(rotateRadians)};
         const float sinRotate {std::sin(rotateRadians)};
-        
+
         for(int i {0}; i < model.points.size(); i++){
             render::Point3D& point {model.points[i]};
             render::Point3D& centerPoint {model.center};
@@ -540,6 +542,7 @@ namespace transform{
             point.y = std::round(rotatedY*100.0f)/100.0f;
             point.z = std::round(rotatedZ*100.0f)/100.0f;
         }
+        model.yz = rotate;
     }
     void setModelPos(render::model::Model& model, render::Point3D newPos){
         for(int i {0}; i < model.points.size(); i++){
