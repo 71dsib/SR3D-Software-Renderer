@@ -467,18 +467,23 @@ namespace render{
 
                             int tileFactor {tri.texture->tileFactor};
 
-                            float u {(((tri.p0.u * w0)/cZ0) + ((tri.p1.u * w1)/cZ1) + ((tri.p2.u * w2)/cZ2))/iZ};
-                            float v {(((tri.p0.v * w0)/cZ0) + ((tri.p1.v * w1)/cZ1) + ((tri.p2.v * w2)/cZ2))/iZ};
+                            uint32_t pixelColor = 0xFFFF00FF;
 
-                            float wrappedU {(u * tileFactor) - std::floor(u * tileFactor)};
-                            float wrappedV {(v * tileFactor) - std::floor(v * tileFactor)};
+                            if(tri.texture != nullptr){
+                                float u {(((tri.p0.u * w0)/cZ0) + ((tri.p1.u * w1)/cZ1) + ((tri.p2.u * w2)/cZ2))/iZ};
+                                float v {(((tri.p0.v * w0)/cZ0) + ((tri.p1.v * w1)/cZ1) + ((tri.p2.v * w2)/cZ2))/iZ};
+    
+                                float wrappedU {(u * tileFactor) - std::floor(u * tileFactor)};
+                                float wrappedV {(v * tileFactor) - std::floor(v * tileFactor)};
+    
+                                int textureX {static_cast<int>(wrappedU*(tri.texture->width))};
+                                int textureY {static_cast<int>(wrappedV*(tri.texture->height))};
+    
+                                textureX = std::clamp(textureX, 0, tri.texture->width-1);
+                                textureY = std::clamp(textureY, 0, tri.texture->height-1);
 
-                            int textureX {static_cast<int>(wrappedU*(tri.texture->width))};
-                            int textureY {static_cast<int>(wrappedV*(tri.texture->height))};
-
-                            textureX = std::clamp(textureX, 0, tri.texture->width-1);
-                            textureY = std::clamp(textureY, 0, tri.texture->height-1);
-                            uint32_t pixelColor {tri.texture->data[textureY * tri.texture->width + textureX]};
+                                pixelColor = tri.texture->data[textureY * tri.texture->width + textureX];
+                            }
                             colorBuffer[y*screenW+x] = applyIntensity(pixelColor, intensity);
                             zBuffer[y*screenW+x] = depth;
                         }
