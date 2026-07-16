@@ -329,7 +329,10 @@ namespace render{
                 cone = 1.0f * (vectorFunctions::spotLights[i].power/100);
             }
 
-            float shadowSample {sampleShadowsSL(pixel3DPos, 0, normal)};
+            float shadowSample {1.0f};
+            if(shadowFunctions::shadowMaps.size() <= i){
+                sampleShadowsSL(pixel3DPos, i, normal);
+            }
             float falloff {1.0f / (1.0f + distanceSq * 0.02f)};
             intensity += diffusion * cone * falloff * shadowSample;
         }
