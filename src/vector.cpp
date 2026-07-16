@@ -44,7 +44,7 @@ namespace vectorFunctions{
         return {(-std::sin(radianYaw) * std::cos(radianPitch)),-std::sin(radianPitch),(-std::cos(radianYaw) * std::cos(radianPitch))};
     }
     std::vector<Vector3D> directionalLights {};
-    std::vector<SpotLight> spotLights {{{8 , 5 , 0}, convertAngle(275,25), 100,std::cos(25*render::radian), 275,25}};
+    std::vector<SpotLight> spotLights {};
     std::vector<PointLight> pointLights {};
 
 }
