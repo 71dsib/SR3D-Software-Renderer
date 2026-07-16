@@ -465,11 +465,11 @@ namespace render{
 
                             float intensity {computeLighting(normal, pixel3DPos)};
 
-                            int tileFactor {tri.texture->tileFactor};
-
                             uint32_t pixelColor = 0xFFFF00FF;
 
                             if(tri.texture != nullptr){
+                                int tileFactor {tri.texture->tileFactor};
+                                
                                 float u {(((tri.p0.u * w0)/cZ0) + ((tri.p1.u * w1)/cZ1) + ((tri.p2.u * w2)/cZ2))/iZ};
                                 float v {(((tri.p0.v * w0)/cZ0) + ((tri.p1.v * w1)/cZ1) + ((tri.p2.v * w2)/cZ2))/iZ};
     
