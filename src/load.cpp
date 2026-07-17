@@ -208,4 +208,220 @@ namespace load{
         loadedModels.push_back(myModel);
         return loadedModels.size() - 1;
     }
+    std::vector<int> loadOBJModelHeirarchy(std::string filePath, int coordinateSys, bool extractNormals){
+        std::vector<int> returnModels {};
+        std::vector<render::model::Model> models {};
+        std::ifstream modelFile {filePath};
+        int currentModel {0};
+        if(!modelFile){
+            std::cout << "Couldn't Access File \n";
+            return {};
+        }
+        std::vector<std::string> fileLines {};
+        std::string readLine {};
+
+        std::vector<render::Point3D> vertices {};
+        std::vector<vectorFunctions::Vector3D> normals {};
+        std::vector<float> textureU {}; // I didn't want to make a new struct just for this //
+        std::vector<float> textureV {};
+
+        std::vector<render::Point3D> verticesL {};
+        std::vector<vectorFunctions::Vector3D> normalsL {};
+        std::vector<render::model::ModelTriangle> triangles {};
+
+        while(std::getline(modelFile, readLine)){
+            fileLines.push_back(readLine);
+        }
+
+        for(int i {0}; i < fileLines.size(); i++){
+            std::stringstream currentLine {fileLines[i]};
+            std::string value {};
+            while(std::getline(currentLine, value, ' ')){
+                if(value == "o"){
+                    if(vertices.size() != 0){
+                        render::model::Model myModel {};
+                        myModel.points = verticesL;
+                        if(extractNormals){
+                            myModel.normals = normalsL;
+                        }
+                        myModel.triangles = triangles;
+                        models.push_back(myModel);
+                        verticesL.clear();
+                        normalsL.clear();
+                        triangles.clear();
+                    }
+                }else if(value == "v"){
+                    float myVertex[3] {};
+                    for(int i {0}; i < 3; i++){
+                        std::getline(currentLine, value, ' ');
+                        myVertex[i] = std::stof(value);
+                    }
+                    vertices.push_back({myVertex[0], myVertex[1], myVertex[2]*coordinateSys});
+                    verticesL.push_back({myVertex[0], myVertex[1], myVertex[2]*coordinateSys});
+                }else if(value == "vt"){
+                    std::getline(currentLine, value, ' ');
+                    textureU.push_back(std::stof(value));
+
+                    std::getline(currentLine, value, ' ');
+                    textureV.push_back(1.0f - std::stof(value));
+                }else if(value == "vn"){
+                    float myVertex[3] {};
+                    for(int i {0}; i < 3; i++){
+                        std::getline(currentLine, value, ' ');
+                        myVertex[i] = std::stof(value);
+                    }
+                    normals.push_back({-myVertex[0], myVertex[1], myVertex[2]});
+                    normalsL.push_back({-myVertex[0], myVertex[1], myVertex[2]});
+                }else if(value == "f"){
+                    std::vector<int> verticesF {};
+                    std::vector<int> uvF {};
+                    std::vector<int> normalsF {};
+                    while(std::getline(currentLine, value, ' ')){
+                        std::stringstream valuesA {value};
+                        std::string valueA {};
+
+                        std::getline(valuesA, valueA, '/');
+                        verticesF.push_back(std::stoi(valueA)-1);
+
+                        std::getline(valuesA, valueA, '/');
+                        uvF.push_back(std::stoi(valueA)-1);
+
+                        std::getline(valuesA, valueA, '/');
+                        normalsF.push_back(std::stoi(valueA)-1);
+                    }
+                    if(verticesF.size() == 3){
+                        render::model::ModelTriangle myTriangle {};
+                        switch(coordinateSys){
+                            case 1:{
+                                myTriangle.u0 = textureU[uvF[0]];
+                                myTriangle.v0 = textureV[uvF[0]];
+
+                                myTriangle.u1 = textureU[uvF[1]];
+                                myTriangle.v1 = textureV[uvF[1]];
+
+                                myTriangle.u2 = textureU[uvF[2]];
+                                myTriangle.v2 = textureV[uvF[2]];
+
+                                myTriangle.pIndex0 = verticesF[0] - (vertices.size() - verticesL.size());
+                                myTriangle.pIndex1 = verticesF[1] - (vertices.size() - verticesL.size());
+                                myTriangle.pIndex2 = verticesF[2] - (vertices.size() - verticesL.size());
+
+                                if(extractNormals == false){
+                                    break;
+                                }
+
+                                myTriangle.nIndex0 = normalsF[0] - (normals.size() - normalsL.size());
+                                myTriangle.nIndex1 = normalsF[1] - (normals.size() - normalsL.size());
+                                myTriangle.nIndex2 = normalsF[2] - (normals.size() - normalsL.size());
+
+                                break;
+                            }
+                            case -1:{
+                                myTriangle.u0 = textureU[uvF[0]];
+                                myTriangle.v0 = textureV[uvF[0]];
+
+                                myTriangle.u1 = textureU[uvF[2]];
+                                myTriangle.v1 = textureV[uvF[2]];
+
+                                myTriangle.u2 = textureU[uvF[1]];
+                                myTriangle.v2 = textureV[uvF[1]];
+
+                                myTriangle.pIndex0 = verticesF[0] - (vertices.size() - verticesL.size());
+                                myTriangle.pIndex1 = verticesF[2] - (vertices.size() - verticesL.size());
+                                myTriangle.pIndex2 = verticesF[1] - (vertices.size() - verticesL.size());
+
+                                if(extractNormals == false){
+                                    break;
+                                }
+
+                                myTriangle.nIndex0 = normalsF[0] - (normals.size() - normalsL.size());
+                                myTriangle.nIndex1 = normalsF[2] - (normals.size() - normalsL.size());
+                                myTriangle.nIndex2 = normalsF[1] - (normals.size() - normalsL.size());
+                                break;
+                            }
+                            default:{
+                                std::cout << "Err. For R. Handed Coordinates, put -1, for L. Handed Coordinates, put 1";
+                            }
+                        }
+                        myTriangle.hasNormals = extractNormals;
+                        triangles.push_back(myTriangle);
+                    }else{
+                        for(int i {1}; i < verticesF.size() - 1; i++){
+                            render::model::ModelTriangle myTriangle {};
+                            switch(coordinateSys){
+                                case 1:{
+                                    myTriangle.u0 = textureU[uvF[0]];
+                                    myTriangle.v0 = textureV[uvF[0]];
+
+                                    myTriangle.u1 = textureU[uvF[i]];
+                                    myTriangle.v1 = textureV[uvF[i]];
+
+                                    myTriangle.u2 = textureU[uvF[i+1]];
+                                    myTriangle.v2 = textureV[uvF[i+1]];
+
+
+                                    myTriangle.pIndex0 = verticesF[0] - (vertices.size() - verticesL.size());
+                                    myTriangle.pIndex1 = verticesF[i] - (vertices.size() - verticesL.size());
+                                    myTriangle.pIndex2 = verticesF[i+1] - (vertices.size() - verticesL.size());
+
+                                    if(extractNormals == false){
+                                        break;
+                                    }
+
+                                    myTriangle.nIndex0 = normalsF[0] - (normals.size() - normalsL.size());
+                                    myTriangle.nIndex1 = normalsF[i] - (normals.size() - normalsL.size());
+                                    myTriangle.nIndex2 = normalsF[i+1] - (normals.size() - normalsL.size());
+                                    break;
+                                }
+                                case -1:{
+                                    myTriangle.u0 = textureU[uvF[0]];
+                                    myTriangle.v0 = textureV[uvF[0]];
+
+                                    myTriangle.u1 = textureU[uvF[i+1]];
+                                    myTriangle.v1 = textureV[uvF[i+1]];
+
+                                    myTriangle.u2 = textureU[uvF[i]];
+                                    myTriangle.v2 = textureV[uvF[i]];
+
+
+                                    myTriangle.pIndex0 = verticesF[0] - (vertices.size() - verticesL.size());
+                                    myTriangle.pIndex1 = verticesF[i+1] - (vertices.size() - verticesL.size());
+                                    myTriangle.pIndex2 = verticesF[i] - (vertices.size() - verticesL.size());
+
+                                    if(extractNormals == false){
+                                        break;
+                                    }
+
+                                    myTriangle.nIndex0 = normalsF[0] - (normals.size() - normalsL.size());
+                                    myTriangle.nIndex1 = normalsF[i+1] - (normals.size() - normalsL.size());
+                                    myTriangle.nIndex2 = normalsF[i] - (normals.size() - normalsL.size());
+                                    break;
+                                }
+                                default:{
+                                    std::cout << "Err. For R. Handed Coordinates, put -1, for L. Handed Coordinates, put 1";
+                                }
+                            }
+                            myTriangle.hasNormals = extractNormals;
+                            triangles.push_back(myTriangle);
+                        }
+                    }
+                }
+            }
+        }
+
+        render::model::Model finalModel {};
+        finalModel.points = verticesL;
+        if(extractNormals){
+            finalModel.normals = normalsL;
+        }
+        finalModel.triangles = triangles;
+        models.push_back(finalModel);
+
+        for(int i {0}; i < models.size(); i++){
+            load::loadedModels.push_back(models[i]);
+            returnModels.push_back(load::loadedModels.size() - 1);
+        }
+
+        return returnModels;
+    }
 }
