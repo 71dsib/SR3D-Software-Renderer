@@ -1,8 +1,6 @@
 #include "sr3d.h"
 
 namespace load{
-    std::vector<render::model::Texture> loadedTextures {};
-    std::vector<render::model::Model> loadedModels {};
     int loadTexture(std::string filePath){
         render::model::Texture myTexture {};
         std::ifstream textureFile {filePath};
