@@ -1,7 +1,7 @@
 #include "sr3d.h"
 
 namespace load{
-    int loadTexture(std::string filePath){
+    int loadTexture(std::string filePath, std::vector<render::model::Texture>& loadedTextures){
         render::model::Texture myTexture {};
         std::ifstream textureFile {filePath};
         if(!textureFile){
@@ -20,7 +20,7 @@ namespace load{
         loadedTextures.push_back(myTexture);
         return loadedTextures.size()-1;
     }
-    int loadOBJModel(std::string filePath, int coordinateSys, bool extractNormals){
+    int loadOBJModel(std::string filePath, int coordinateSys, bool extractNormals, std::vector<render::model::Model>& loadedModels){
         render::model::Model myModel {};
         std::ifstream modelFile {filePath};
         if(!modelFile){
@@ -206,7 +206,7 @@ namespace load{
         loadedModels.push_back(myModel);
         return loadedModels.size() - 1;
     }
-    std::vector<int> loadOBJModelHeirarchy(std::string filePath, int coordinateSys, bool extractNormals){
+    std::vector<int> loadOBJModelHeirarchy(std::string filePath, int coordinateSys, bool extractNormals, std::vector<render::model::Model>& loadedModels){
         std::vector<int> returnModels {};
         std::vector<render::model::Model> models {};
         std::ifstream modelFile {filePath};
@@ -416,10 +416,9 @@ namespace load{
         models.push_back(finalModel);
 
         for(int i {0}; i < models.size(); i++){
-            load::loadedModels.push_back(models[i]);
-            returnModels.push_back(load::loadedModels.size() - 1);
+            loadedModels.push_back(models[i]);
+            returnModels.push_back(loadedModels.size() - 1);
         }
-
         return returnModels;
     }
 }
