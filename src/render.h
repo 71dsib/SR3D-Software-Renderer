@@ -277,7 +277,7 @@ namespace render{
     float edgeFunction(const Point2D& a, const Point2D& b, const Point2D& c);
     float computeLighting(vectorFunctions::Vector3D& normal, vectorFunctions::Vector3D& pixel3DPos);
     uint32_t applyIntensity(const uint32_t& color, float intensity);
-    void tileRasterizeModels();
+    void tileRasterizeModels(std::vector<model::Model>& loadedModels);
     void rasterizeTriangle(model::Triangle tri, float tileFactor);
     void rasterizeTriangleClip(model::Triangle tri, float tileFactor = 1.0f);
 }
