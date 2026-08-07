@@ -351,12 +351,12 @@ namespace render{
         }
         return (intensity * 0.7f) + 0.1f;
     }
-    void tileRasterizeModels(){
+    void tileRasterizeModels(std::vector<model::Model>& loadedModels){
         std::vector<model::Triangle> clippedTriangles {};
         std::vector<model::Triangle2D> projectedTriangles {};
-        for(int i {0}; i < load::loadedModels.size(); i++){
-            for(int j {0}; j < load::loadedModels[i].triangles.size(); j++){
-                const model::Triangle& tri {load::loadedModels[i].triangles[j].convert(load::loadedModels[i].points, load::loadedModels[i].normals)};
+        for(int i {0}; i < loadedModels.size(); i++){
+            for(int j {0}; j < loadedModels[i].triangles.size(); j++){
+                const model::Triangle& tri {loadedModels[i].triangles[j].convert(loadedModels[i].points, loadedModels[i].normals)};
                 model::Triangle camTri {tri};
 
                 camTri.p0 = clip::toCameraSpace(tri.p0);
@@ -469,16 +469,16 @@ namespace render{
 
                             if(tri.texture != nullptr){
                                 int tileFactor {tri.texture->tileFactor};
-                                
+
                                 float u {(((tri.p0.u * w0)/cZ0) + ((tri.p1.u * w1)/cZ1) + ((tri.p2.u * w2)/cZ2))/iZ};
                                 float v {(((tri.p0.v * w0)/cZ0) + ((tri.p1.v * w1)/cZ1) + ((tri.p2.v * w2)/cZ2))/iZ};
-    
+
                                 float wrappedU {(u * tileFactor) - std::floor(u * tileFactor)};
                                 float wrappedV {(v * tileFactor) - std::floor(v * tileFactor)};
-    
+
                                 int textureX {static_cast<int>(wrappedU*(tri.texture->width))};
                                 int textureY {static_cast<int>(wrappedV*(tri.texture->height))};
-    
+
                                 textureX = std::clamp(textureX, 0, tri.texture->width-1);
                                 textureY = std::clamp(textureY, 0, tri.texture->height-1);
 
