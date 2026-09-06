@@ -351,7 +351,7 @@ namespace render{
         }
         return (intensity * 0.7f) + 0.1f;
     }
-    void tileRasterizeModels(std::vector<model::Model>& loadedModels){
+    void tileRasterizeModels(std::vector<model::Model>& loadedModels, bool uvInterpolate, bool lightingEnabled){
         std::vector<model::Triangle> clippedTriangles {};
         std::vector<model::Triangle2D> projectedTriangles {};
         for(int i {0}; i < loadedModels.size(); i++){
@@ -453,36 +453,43 @@ namespace render{
                                 continue;
                             }
 
-                            vectorFunctions::Vector3D normal {vectorFunctions::add3D(vectorFunctions::add3D(vectorFunctions::multiply3D(tri.n0, w0), vectorFunctions::multiply3D(tri.n1, w1)), vectorFunctions::multiply3D(tri.n2, w2))}; // This doesn't look like it but this is interpolating //
-                            normal = vectorFunctions::fastNormalize(normal);
-
+                            vectorFunctions::Vector3D normal {}; // This doesn't look like it but this is interpolating //
                             vectorFunctions::Vector3D pixel3DPos {}; // I used Vector3D instead of Point3D because this is used in Vector Operations so it's easier to leave it like this //
 
-                            float pixel3DPosX {(((tri.p0.x * w0)/cZ0) + ((tri.p1.x * w1)/cZ1) + ((tri.p2.x * w2)/cZ2))/iZ};
-                            float pixel3DPosY {(((tri.p0.y * w0)/cZ0) + ((tri.p1.y * w1)/cZ1) + ((tri.p2.y * w2)/cZ2))/iZ};
-                            float pixel3DPosZ {(((tri.p0.z * w0)/cZ0) + ((tri.p1.z * w1)/cZ1) + ((tri.p2.z * w2)/cZ2))/iZ};
-                            pixel3DPos = {pixel3DPosX, pixel3DPosY, pixel3DPosZ};
+                            float intensity {1.0f};
 
-                            float intensity {computeLighting(normal, pixel3DPos)};
+                            if(lightingEnabled){
+                                normal = vectorFunctions::add3D(vectorFunctions::add3D(vectorFunctions::multiply3D(tri.n0, w0), vectorFunctions::multiply3D(tri.n1, w1)), vectorFunctions::multiply3D(tri.n2, w2));
+                                normal = vectorFunctions::fastNormalize(normal);
+                                float pixel3DPosX {(((tri.p0.x * w0)/cZ0) + ((tri.p1.x * w1)/cZ1) + ((tri.p2.x * w2)/cZ2))/iZ};
+                                float pixel3DPosY {(((tri.p0.y * w0)/cZ0) + ((tri.p1.y * w1)/cZ1) + ((tri.p2.y * w2)/cZ2))/iZ};
+                                float pixel3DPosZ {(((tri.p0.z * w0)/cZ0) + ((tri.p1.z * w1)/cZ1) + ((tri.p2.z * w2)/cZ2))/iZ};
+                                pixel3DPos = {pixel3DPosX, pixel3DPosY, pixel3DPosZ};
+                                intensity = computeLighting(normal, pixel3DPos);
+                            }
 
                             uint32_t pixelColor = 0xFFFF00FF;
 
                             if(tri.texture != nullptr){
-                                int tileFactor {tri.texture->tileFactor};
+                                if(uvInterpolate){
+                                    int tileFactor {tri.texture->tileFactor};
 
-                                float u {(((tri.p0.u * w0)/cZ0) + ((tri.p1.u * w1)/cZ1) + ((tri.p2.u * w2)/cZ2))/iZ};
-                                float v {(((tri.p0.v * w0)/cZ0) + ((tri.p1.v * w1)/cZ1) + ((tri.p2.v * w2)/cZ2))/iZ};
+                                    float u {(((tri.p0.u * w0)/cZ0) + ((tri.p1.u * w1)/cZ1) + ((tri.p2.u * w2)/cZ2))/iZ};
+                                    float v {(((tri.p0.v * w0)/cZ0) + ((tri.p1.v * w1)/cZ1) + ((tri.p2.v * w2)/cZ2))/iZ};
 
-                                float wrappedU {(u * tileFactor) - std::floor(u * tileFactor)};
-                                float wrappedV {(v * tileFactor) - std::floor(v * tileFactor)};
+                                    float wrappedU {(u * tileFactor) - std::floor(u * tileFactor)};
+                                    float wrappedV {(v * tileFactor) - std::floor(v * tileFactor)};
 
-                                int textureX {static_cast<int>(wrappedU*(tri.texture->width))};
-                                int textureY {static_cast<int>(wrappedV*(tri.texture->height))};
+                                    int textureX {static_cast<int>(wrappedU*(tri.texture->width))};
+                                    int textureY {static_cast<int>(wrappedV*(tri.texture->height))};
 
-                                textureX = std::clamp(textureX, 0, tri.texture->width-1);
-                                textureY = std::clamp(textureY, 0, tri.texture->height-1);
+                                    textureX = std::clamp(textureX, 0, tri.texture->width-1);
+                                    textureY = std::clamp(textureY, 0, tri.texture->height-1);
 
-                                pixelColor = tri.texture->data[textureY * tri.texture->width + textureX];
+                                    pixelColor = tri.texture->data[textureY * tri.texture->width + textureX];
+                                }else{
+                                    pixelColor = tri.texture->data[0];
+                                }
                             }
                             colorBuffer[y*screenW+x] = applyIntensity(pixelColor, intensity);
                             zBuffer[y*screenW+x] = depth;
